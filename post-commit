@@ -1,0 +1,18 @@
+#!/bin/sh
+
+#add any changes to repo
+if [ -L "tests" ]; then
+(
+    branchName="$(git symbolic-ref --short HEAD)"
+    email=$GIT_AUTHOR_EMAIL
+    cd tests || exit ;
+    if test -n "$(env -i git status --porcelain)"; then
+        2ndBranchName="$(env -i git symbolic-ref --short HEAD)"
+        if "$branchName" -eq "$2ndBranchName"; then
+            env -i git pull origin "$branchName"
+            env -i git add -A
+            env -i git commit --author "$email" -m "Autocommit by $email"
+        fi
+    fi
+)
+fi

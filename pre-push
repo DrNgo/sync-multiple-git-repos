@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ -L "tests" ]; then
+    #add and push any changes to secondary remote repo
+    (
+        branchName="$(git symbolic-ref --short HEAD)"
+        email=$GIT_AUTHOR_EMAIL
+        cd tests || exit ;
+        if test -n "$(env -i git status --porcelain)"; then
+            2ndBranchName="$(env -i git symbolic-ref --short HEAD)"
+            if "$branchName" -eq "$2ndBranchName"; then
+                env -i git pull origin "$branchName"
+                env -i git add -A
+                env -i git commit --author "$email" -m "autocommit by $email"
+                env -i git push origin "$branchName"
+            fi
+        fi
+    )
+fi

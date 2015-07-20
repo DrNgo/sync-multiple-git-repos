@@ -1,0 +1,31 @@
+#!/bin/sh
+
+#check if branch checkout
+if [ "$3" -eq "1" ]; then
+
+    #subshell to update and checkout branch in secondary repo in tests directory
+    if [ -L "tests" ]; then
+    (   
+        branchName="$(git symbolic-ref --short HEAD)"
+        email=$GIT_AUTHOR_EMAIL
+        cd tests || exit ; 
+        env -i git fetch
+    
+        #checks if any existing changes to commit
+        if test -n "$(env -i git status --porcelain)"; then
+            env -i git add -A
+            env -i git commit --author "$email" -m "Autocommit on checkout by $email"
+        fi
+        
+        #Checks out new/existing branch
+        if env -i git rev-parse --verify "$branchName"; 
+        then
+            env -i git checkout "$branchName"
+            echo "$branchName has been checked out"
+        else
+            env -i git checkout -b "$branchName"
+            echo "$branchName has been created"
+        fi
+    )
+    fi
+fi
